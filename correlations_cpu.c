@@ -28,26 +28,23 @@ void bin_crosses_2bit(uint8_t *pol0, uint8_t *pol1, int *sum, int ndata, int nch
       		int8_t pol1_im;
       		if (i % 2 == 0) //some of the data is in the beginning four bytes, and some of the data is in the ending four bytes.
       		{
-      			pol0_re = (pol0[i] >> 6) & mask;
-      			pol0_im = (pol0[i] >> 4) & mask;
-      			pol1_re = (pol1[i] >> 6) & mask;
-      			pol1_im = (pol1[i] >> 4) & mask;
-      			if (pol0_re <= 1) {pol0_re -= 2;}
-      			if (pol0_re <= 1) {pol0_re -= 2;}
-      			if (pol0_re <= 1) {pol0_re -= 2;}
-      			if (pol0_re <= 1) {pol0_re -= 2;}
+      			pol0_re = ((pol0[i] >> 6) & mask) - 1;
+      			pol0_im = ((pol0[i] >> 4) & mask) - 1;
+      			pol1_re = ((pol1[i] >> 6) & mask) - 1;
+      			pol1_im = ((pol1[i] >> 4) & mask) - 1;
       		}
       		else
       		{
-      			pol0_re = (pol0[i] >> 2) & mask;
-      			pol0_im = pol0[i] & mask;
-      			pol1_re = pol1[i] >> 2 & mask;
-      			pol1_im = pol1[i] & mask;
-      			if (pol0_re <= 1) {pol0_re -= 2;}
-      			if (pol0_re <= 1) {pol0_re -= 2;}
-      			if (pol0_re <= 1) {pol0_re -= 2;}
-      			if (pol0_re <= 1) {pol0_re -= 2;}
+      			pol0_re = ((pol0[i] >> 2) & mask) - 1;
+      			pol0_im = (pol0[i] & mask) - 1;
+      			pol1_re = (pol1[i] >> 2 & mask) - 1;
+      			pol1_im = (pol1[i] & mask) - 1;
       		}
+      		
+      		if (pol0_re <= 0) {pol0_re --;}
+      		if (pol0_im <= 0) {pol0_im --;}
+      		if (pol1_re <= 0) {pol1_re --;}
+      		if (pol1_im <= 0) {pol1_im --;}
       		
       		sum[currentChunk * nchan * 2 + currentChannel * 2] += pol0_re * pol1_re + pol0_im * pol1_im;
       		sum[currentChunk * nchan * 2 + currentChannel * 2 + 1] += pol0_im * pol1_re - pol0_re * pol1_im;
