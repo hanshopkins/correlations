@@ -71,8 +71,16 @@ class baseband_data_float:
 		
 		
 def sortpols(data, length_channels, bit_mode):
-	pol0 = numpy.zeros([data.shape[0]//2,length_channels],dtype='uint8') #this causes an error when it's //2. I think sortpols is the wrong size or something.
-	pol1 = numpy.zeros([data.shape[0]//2,length_channels],dtype='uint8')
+	
+	if bit_mode == 4:
+		pol0 = numpy.zeros([data.shape[0]//2,length_channels],dtype='uint8', order = 'c')
+		pol1 = numpy.zeros([data.shape[0]//2,length_channels],dtype='uint8', order = 'c')
+	elif bit_mode == 2:
+		pol0 = numpy.zeros([data.shape[0]//4,length_channels],dtype='uint8', order = 'c')
+		pol1 = numpy.zeros([data.shape[0]//4,length_channels],dtype='uint8', order = 'c')
+	elif bit_mode == 1:
+		pol0 = numpy.zeros([data.shape[0]//8,length_channels],dtype='uint8', order = 'c')
+		pol1 = numpy.zeros([data.shape[0]//8,length_channels],dtype='uint8', order = 'c')
 			
 	t1 = time.time()
 	sortpols_c(data.ctypes.data,pol0.ctypes.data,pol1.ctypes.data,data.shape[0],data.shape[1], bit_mode)
@@ -118,12 +126,8 @@ class baseband_data_packed:
 		print('took ',t2-t1,' seconds to read raw data on ', file_name)
 		file_data.close()
 		
-		if self.bit_mode == 4:
-			raw_spectra = data["spectra"].reshape(-1, self.length_channels)
-			self.pol0, self.pol1 = sortpols(raw_spectra, self.length_channels, self.bit_mode)
-		else:
-			print("bit mode is not 4")
-		
+		raw_spectra = data["spectra"].reshape(-1, self.length_channels)
+		self.pol0, self.pol1 = sortpols(raw_spectra, self.length_channels, self.bit_mode)
     
 	def print_header(self):
 		print("Header Bytes = " + str(self.header_bytes) + ". Bytes per packet = " + str(self.bytes_per_packet) + ". Channel length = " + str(self.length_channels) + ". Spectra per packet: " + str(self.spectra_per_packet) + ". Bit mode: " + str(self.bit_mode) + ". Have trimble = " + str(self.have_trimble) + ". Channels: " + str(self.channels) + " GPS week = " + str(self.gps_week)+ ". GPS timestamp = " + str(self.gps_timestamp) + ". GPS latitude = " + str(self.gps_latitude) + ". GPS longitude = " + str(self.gps_longitude) + ". GPS elevation = " + str(self.gps_elevation) + ".")

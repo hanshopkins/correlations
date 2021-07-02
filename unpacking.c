@@ -66,8 +66,54 @@ void sortpols (uint8_t *data, uint8_t *pol0, uint8_t *pol1, int ndat, int nchan,
 		long nn=ndat*nchan/2;
 		for (int i = 0; i < nn; i++)
 		{
-			pol0[i] = data[2 * i];//this might be wrong
+			pol0[i] = data[2 * i];
 			pol1[i] = data[2 * i + 1];
 		}
 	}
+	else if (bit_depth == 2){
+		long nn=ndat*nchan/2;
+		uint8_t mask1 = 15;
+		uint8_t mask0 = 240;
+		for (int i = 0; i < nn; i++)
+		{
+			switch (i % 2)
+			{
+				case 0:
+				  pol0[i/2] = data[i] & mask0;
+				  pol1[i/2] = (data[i] & mask1) << 4;
+				  break;
+				case 1:
+				  pol0[i/2] += (data[i] & mask0) >> 4;
+				  pol1[i/2] += data[i] & mask1;
+				  break;
+			}
+		}
+	}
+	else if (bit_depth == 1){
+		long nn=ndat*nchan/2;
+		uint8_t mask = 3;
+		for (int i = 0; i < nn; i++)
+		{
+			switch (i % 4)
+			{
+				case 0:
+				  pol0[i/4] = ((data[i/2] >> 6) & mask) << 6;
+				  pol1[i/4] = ((data[i/2] >> 4) & mask) << 6;
+				  break;
+				case 1:
+				  pol0[i/4] = ((data[i/2] >> 2) & mask) << 4;
+				  pol1[i/4] = (data[i/2] & mask) << 4;
+				  break;
+				case 2:
+				  pol0[i/4] = ((data[i/2] >> 6) & mask) << 2;
+				  pol1[i/4] = ((data[i/2] >> 4) & mask) << 2;
+				  break;
+				case 3:
+				  pol0[i/4] = (data[i/2] >> 2) & mask;
+				  pol1[i/4] = data[i/2] & mask;
+				  break; 
+			}
+		}
+	}
+	else printf("sortpols unknown bit depth");
 }
