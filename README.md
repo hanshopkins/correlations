@@ -1,10 +1,7 @@
 # correlations
-Better correlations including CPU and GPU versions.
 
-This is an early commit and it doesn't work yet.
+Usage: Run setup_cpu.py to compile the c files using `python3 -c 'from setup_cpu import build; build()'`
 
-Usage: Both c files need to be compiled into .so files. I'll write a setup script to do this.
+The classes for importing baseband data are in baseband_data_classes.py.
 
-The classes for importing baseband data are in baseband_data_classes.py. More will be added. Currently only 4 bit unpacking is supported.
-
-Use the unpacked version of the class as the argument for average_cross_correlations in correlations.py to find the average.
+Use the unpacked version of the class as the argument for average_cross_correlations in correlations.py to find the average. The second argument is the chunk size, or the bin size.
