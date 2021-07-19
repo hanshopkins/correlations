@@ -14,12 +14,12 @@ void bin_crosses_1bit(const uint8_t *pol0, const uint8_t *pol1, int *sum, int nd
       		}
       	}
       	
-      	unsigned int totalndata = ndata * nchan;
+      	unsigned int totalndata = nchunk * chunk * nchan;
       	unsigned int chunkData = chunk * nchan;
       	for (unsigned int i = 0; i < totalndata; i++)
       	{
       		int currentChannel = i % nchan;
-      		int currentChunk = i % chunkData;
+      		int currentChunk = i / chunkData;
       		
       		int8_t pol0_re;
       		int8_t pol0_im;
@@ -76,12 +76,12 @@ void bin_autos_1bit(const uint8_t *data, int *sum, int ndata, int nchan, int chu
       		}
       	}
       	
-      	unsigned int totalndata = ndata * nchan;
+      	unsigned int totalndata = nchunk * chunk * nchan;
       	unsigned int chunkData = chunk * nchan;
       	for (unsigned int i = 0; i < totalndata; i++)
       	{
       		int currentChannel = i % nchan;
-      		int currentChunk = i % chunkData;
+      		int currentChunk = i / chunkData;
       		
       		int8_t data_re;
       		int8_t data_im;
@@ -127,12 +127,12 @@ void bin_crosses_2bit(const uint8_t *pol0, const uint8_t *pol1, int *sum, int nd
       		}
       	}
       	
-      	unsigned int totalndata = ndata * nchan;
+      	unsigned int totalndata = nchunk * chunk * nchan;
       	unsigned int chunkData = chunk * nchan;
       	for (unsigned int i = 0; i < totalndata; i++)
       	{
       		int currentChannel = i % nchan;
-      		int currentChunk = i % chunkData;
+      		int currentChunk = i / chunkData;
       		
       		int8_t pol0_re;
       		int8_t pol0_im;
@@ -176,12 +176,12 @@ void bin_autos_2bit(const uint8_t *data, int *sum, int ndata, int nchan, int chu
       		}
       	}
       	
-      	unsigned int totalndata = ndata * nchan;
+      	unsigned int totalndata = nchunk * chunk * nchan;
       	unsigned int chunkData = chunk * nchan;
       	for (unsigned int i = 0; i < totalndata; i++)
       	{
       		int currentChannel = i % nchan;
-      		int currentChunk = i % chunkData;
+      		int currentChunk = i / chunkData;
       		
       		int8_t data_re;
       		int8_t data_im;
@@ -288,7 +288,8 @@ void average_cross_correlations (const uint8_t *pol0, const uint8_t *pol1, float
 		{
 			sumssum += sum[i + j * 2 * nchan];
 		}
-		averages[i] = sumssum * 1.0 / (ndata/chunk) / chunk; //I divide by chunk size as the end so that it doesn't depend as much on the chunk size
+		//averages[i] = sumssum * 1.0 / (ndata/chunk) / chunk; //I divide by chunk size as the end so that it doesn't depend as much on the chunk size
+		averages[i] = sumssum;
 	}
 }
 
@@ -317,6 +318,7 @@ void average_auto (const uint8_t *data, float *averages, int ndata, int nchan, i
 		{
 			sumssum += sum[i + j * nchan];
 		}
-		averages[i] = sumssum * 1.0 / (ndata/chunk) / chunk;
+		//averages[i] = sumssum * 1.0 / (ndata/chunk) / chunk; //normalization optional
+		averages[i] = sumssum;
 	}
 }

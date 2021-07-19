@@ -7,6 +7,10 @@ import os
 mylib=ctypes.cdll.LoadLibrary(os.path.realpath(__file__+r"/..")+"/lib_unpacking.so")
 unpack_4bit_float_c = mylib.unpack_4bit_float
 unpack_4bit_float_c.argtypes = [ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_int, ctypes.c_int]
+unpack_2bit_float_c = mylib.unpack_2bit_float
+unpack_2bit_float_c.argtypes = [ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_int, ctypes.c_int]
+unpack_1bit_float_c = mylib.unpack_1bit_float
+unpack_1bit_float_c.argtypes = [ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_int, ctypes.c_int]
 sortpols_c = mylib.sortpols
 sortpols_c.argtypes = [ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_int, ctypes.c_int, ctypes.c_short]
 
@@ -17,6 +21,32 @@ def unpack_4bit(data, length_channels, isfloat):
 			
 		t1 = time.time()
 		unpack_4bit_float_c(data.ctypes.data,pol0.ctypes.data,pol1.ctypes.data,data.shape[0],data.shape[1])
+		t2 = time.time()
+		print("Took " + str(t2 - t1) + " to unpack")
+	else:
+		print("not float")
+	return pol0, pol1
+
+def unpack_2bit(data, length_channels, isfloat):
+	if isfloat:
+		pol0 = numpy.zeros([data.shape[0] * 2,length_channels],dtype='complex64')
+		pol1 = numpy.zeros([data.shape[0] * 2,length_channels],dtype='complex64')
+			
+		t1 = time.time()
+		unpack_1bit_float_c(data.ctypes.data,pol0.ctypes.data,pol1.ctypes.data,data.shape[0],data.shape[1])
+		t2 = time.time()
+		print("Took " + str(t2 - t1) + " to unpack")
+	else:
+		print("not float")
+	return pol0, pol1
+
+def unpack_1bit(data, length_channels, isfloat):
+	if isfloat:
+		pol0 = numpy.zeros([data.shape[0],length_channels],dtype='complex64')
+		pol1 = numpy.zeros([data.shape[0],length_channels],dtype='complex64')
+			
+		t1 = time.time()
+		unpack_2bit_float_c(data.ctypes.data,pol0.ctypes.data,pol1.ctypes.data,data.shape[0],data.shape[1])
 		t2 = time.time()
 		print("Took " + str(t2 - t1) + " to unpack")
 	else:
@@ -63,8 +93,14 @@ class baseband_data_float:
 		if self.bit_mode == 4:
 			raw_spectra = data["spectra"].reshape(-1, self.length_channels)
 			self.pol0, self.pol1 = unpack_4bit(raw_spectra, self.length_channels, True)
+		elif self.bit_mode == 2:
+			raw_spectra = data["spectra"].reshape(-1, self.length_channels)
+			self.pol0, self.pol1 = unpack_2bit(raw_spectra, self.length_channels, True)
+		elif self.bit_mode == 1:
+			raw_spectra = data["spectra"].reshape(-1, self.length_channels//2)
+			self.pol0, self.pol1 = unpack_1bit(raw_spectra, self.length_channels, True)
 		else:
-			print("bit mode is not 4")
+			print("Unknown bit depth")
     
 	def print_header(self):
 		print("Header Bytes = " + str(self.header_bytes) + ". Bytes per packet = " + str(self.bytes_per_packet) + ". Channel length = " + str(self.length_channels) + ". Spectra per packet: " + str(self.spectra_per_packet) + ". Bit mode: " + str(self.bit_mode) + ". Have trimble = " + str(self.have_trimble) + ". Channels: " + str(self.channels) + " GPS week = " + str(self.gps_week)+ ". GPS timestamp = " + str(self.gps_timestamp) + ". GPS latitude = " + str(self.gps_latitude) + ". GPS longitude = " + str(self.gps_longitude) + ". GPS elevation = " + str(self.gps_elevation) + ".")
@@ -126,7 +162,12 @@ class baseband_data_packed:
 		print('took ',t2-t1,' seconds to read raw data on ', file_name)
 		file_data.close()
 		
-		raw_spectra = data["spectra"].reshape(-1, self.length_channels)
+		if self.bit_mode == 4 or self.bit_mode == 2:
+			raw_spectra = data["spectra"].reshape(-1, self.length_channels)
+		elif self.bit_mode == 1:
+			raw_spectra = data["spectra"].reshape(-1, self.length_channels//2)
+		else:
+			print("Unknown bit mode")
 		self.pol0, self.pol1 = sortpols(raw_spectra, self.length_channels, self.bit_mode)
     
 	def print_header(self):

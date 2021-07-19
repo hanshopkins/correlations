@@ -13,7 +13,10 @@ def average_cross_correlations (filename, chunkSize=1000):
 	bb_data = baseband_data_packed(filename)
 	
 	averages_pointer = (ctypes.c_float * (2 * bb_data.length_channels))()
-	mylib.average_cross_correlations(bb_data.pol0.ctypes.data, bb_data.pol1.ctypes.data, averages_pointer, bb_data.pol0.shape[0], bb_data.length_channels, chunkSize, bb_data.bit_mode)
+	if bb_data.bit_mode == 4 or bb_data.bit_mode == 2:
+		mylib.average_cross_correlations(bb_data.pol0.ctypes.data, bb_data.pol1.ctypes.data, averages_pointer, bb_data.pol0.shape[0], bb_data.length_channels, chunkSize, bb_data.bit_mode)
+	else: #for 1 bit the length is bb_data.pol0.shape[0]/2 + 1
+		mylib.average_cross_correlations(bb_data.pol0.ctypes.data, bb_data.pol1.ctypes.data, averages_pointer, bb_data.pol0.shape[0]//2 + 1, bb_data.length_channels, chunkSize, bb_data.bit_mode) 
 	
 	averages = numpy.zeros(bb_data.length_channels, dtype = "complex64")
 	for i in range(bb_data.length_channels):
