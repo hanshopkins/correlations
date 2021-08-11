@@ -4,4 +4,6 @@ Usage: Run setup_cpu.py to compile the c files using `python3 -c 'from setup_cpu
 
 The classes for importing baseband data are in baseband_data_classes.py.
 
-Use the unpacked version of the class as the argument for average_cross_correlations in correlations.py to find the average. The second argument is the chunk size, or the bin size.
+To choose which packets to import, set the spec_selection argument to true, and then the low_specnum and high_specnum arguments to the upper and lower bounds of the spectra you want to import. It will import the packets containing the chosen specnums including both ends.
+
+Use the filename as the argument for average_cross_correlations in correlations.py to find the average. The second argument is the chunk size, or the bin size.
