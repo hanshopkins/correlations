@@ -145,3 +145,86 @@ void sortpols (uint8_t *data, uint8_t *pol0, uint8_t *pol1, int ndat, int nchan,
 	}
 	else printf("sortpols unknown bit depth");
 }
+
+unsigned int dropped_packets (uint8_t *data, unsigned long *spec_num, unsigned int num_packets, const int spectra_per_packet, int nchan, short bit_depth)
+{
+	if (num_packets >= 2)
+	{
+		unsigned int num_dropped = 0;
+		unsigned int entries_per_packet;
+		if (bit_depth == 4)
+		{
+			entries_per_packet = 2 * nchan * spectra_per_packet;
+		}
+		else if (bit_depth == 2) 
+		{
+			entries_per_packet = nchan * spectra_per_packet;
+		}
+		else if (bit_depth == 1)
+		{
+			entries_per_packet = nchan * spectra_per_packet/2; //This is supposed to divide evenly. If it doesn't, that means the packet ends in the middle of a byte, which would be bad
+		}
+		else return 0;
+
+		for (unsigned int j = 0; j < num_packets - 1; j++)
+		{
+			if (spec_num[j + 1] - spec_num[j] != spectra_per_packet)
+			{
+				num_dropped++;
+				const unsigned int initial = entries_per_packet * j;
+				const unsigned int bound = initial + entries_per_packet;
+				for (unsigned int i = initial; i < bound; i++)
+				{
+					data[i] = 0;
+				}
+			}
+		}
+		return num_dropped;
+	}
+	else 
+	{
+		printf("There are fewer than 2 packets in the dropped packets function\n");
+		return 0;
+	}
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
