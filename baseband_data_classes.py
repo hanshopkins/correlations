@@ -35,7 +35,7 @@ def unpack_2bit(data, length_channels, isfloat):
 		pol1 = numpy.zeros([data.shape[0] * 2,length_channels],dtype='complex64')
 			
 		t1 = time.time()
-		unpack_1bit_float_c(data.ctypes.data,pol0.ctypes.data,pol1.ctypes.data,data.shape[0],data.shape[1])
+		unpack_2bit_float_c(data.ctypes.data,pol0.ctypes.data,pol1.ctypes.data,data.shape[0],data.shape[1])
 		t2 = time.time()
 		print("Took " + str(t2 - t1) + " to unpack")
 	else:
